@@ -77,5 +77,5 @@ The worker runs on a cron schedule (every 2 hours by default). Each invocation:
 1. Scrapes the configured Meetup page for upcoming events
 2. Checks Cloudflare KV for previously announced events
 3. Filters events to those within the lead time window (default 6.5 days)
-4. Posts new events to Discord via webhook, routing by event title regex
+4. Posts new events to Discord via webhook as rich embeds (with title, link, and timestamps), routing by event title regex
 5. Records announced event IDs in KV (keeps last 100)
