@@ -7,9 +7,9 @@ crons = ["0 */2 * * *"]
 
 [[kv_namespaces]]
 binding = "HISTORY_KV"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "3761b04a7863402c96b68b80e3a9b40b"
 
 [vars]
-MEETUP_NAME = "My-Gaming-Meetup"
+MEETUP_NAME = "uptown-nyc-board-gamers"
 LEAD_TIME_DAYS = "6.5"
 # FAKE_SEND = "y"
