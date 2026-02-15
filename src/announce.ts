@@ -20,11 +20,17 @@ export async function announceMeetup(env: Env, event: Event): Promise<void> {
   }
   console.log(`  Matched webhook URL: ${webhookUrl.substring(0, 60)}...`);
 
-  const message = `**Attention: here's the next meetup! Come join us for fun and games.**
+  const timestamp = Math.floor(event.dateTime.getTime() / 1000);
 
-  ${event.title}
-  ${event.eventUrl}
-  `;
+  const body = {
+    username: "Meetup Announcebot",
+    embeds: [{
+      title: event.title,
+      url: event.eventUrl,
+      description: `Come join us for fun and games!\n\n:calendar_spiral: <t:${timestamp}:F>\n:clock3: <t:${timestamp}:R>`,
+      color: 0xED1C40,
+    }],
+  };
 
   try {
     if (env.FAKE_SEND) {
@@ -33,7 +39,7 @@ export async function announceMeetup(env: Env, event: Event): Promise<void> {
       const response = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: message }),
+        body: JSON.stringify(body),
       });
       if (!response.ok) {
         console.error(`  Webhook POST failed: ${response.status} ${response.statusText}`);
