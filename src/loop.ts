@@ -1,18 +1,18 @@
-import { Client } from "discord.js";
-import {scrapeMeetup} from "./scrape";
-import {readHistory, writeHistory} from "./History";
-import {announceMeetup} from "./announce";
-import {config} from "./config";
-import {eventToString} from "./Event";
+import { Env } from "./types";
+import { scrapeMeetup } from "./scrape";
+import { readHistory, writeHistory } from "./History";
+import { announceMeetup } from "./announce";
+import { getLeadTimeDays } from "./config";
+import { eventToString } from "./Event";
 
 const DAY_TO_SECONDS = 24 * 60 * 60;
 
-export async function loop(client: Client<boolean>) {
-  const events = await scrapeMeetup(config.MEETUP_NAME,/* test=*/ false);
-  const history = readHistory();
+export async function runOnce(env: Env): Promise<void> {
+  const events = await scrapeMeetup(env.MEETUP_NAME);
+  const history = await readHistory(env);
 
   const nowMillis = new Date().getTime();
-  const leadTimeMillis = config.LEAD_TIME_DAYS * DAY_TO_SECONDS * 1000;
+  const leadTimeMillis = getLeadTimeDays(env.LEAD_TIME_DAYS) * DAY_TO_SECONDS * 1000;
 
   // Events later than maxEventTimeMillis are not soon enough to publish.
   const maxEventTimeMillis = nowMillis + leadTimeMillis;
@@ -34,7 +34,10 @@ export async function loop(client: Client<boolean>) {
     }
     return true;
   });
-  return Promise.all(filtered.map((event) => {
-    return announceMeetup(client, event).then(() => history.posted.push(event.id));
-  })).then(() => writeHistory(history));
+
+  await Promise.all(filtered.map((event) => {
+    return announceMeetup(env, event).then(() => history.posted.push(event.id));
+  }));
+
+  await writeHistory(env, history);
 }

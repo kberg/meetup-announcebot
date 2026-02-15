@@ -1,42 +1,44 @@
-import {Client, TextChannel} from "discord.js";
-import {Event, eventToString} from "./Event";
-import {config} from "./config";
+import { Event, eventToString } from "./Event";
+import { Env } from "./types";
+import { parseWebhookUrls } from "./config";
 
-function getChannelId(client: Client<boolean>, event: Event): string | undefined {
-  const e = Object.entries(config.CHANNEL_IDS).find(([regexp, _channelId]) => {
-    return new RegExp(regexp, 'gi').test(event.title)
+function getWebhookUrl(env: Env, event: Event): string | undefined {
+  const webhookUrls = parseWebhookUrls(env.WEBHOOK_URLS);
+  const entry = Object.entries(webhookUrls).find(([regexp, _url]) => {
+    return new RegExp(regexp, 'gi').test(event.title);
   });
-  return e?.[1] || config.DEFAULT_CHANNEL_ID;
+  return entry?.[1] || env.DEFAULT_WEBHOOK_URL || undefined;
 }
 
-export async function announceMeetup(client: Client<boolean>, event: Event): Promise<void> {
-  const title = event.title;
+export async function announceMeetup(env: Env, event: Event): Promise<void> {
   console.log(`Announcing ${eventToString(event)}`);
 
-  const channelId = getChannelId(client, event);
-  if (channelId === undefined) {
-    console.log(`  No channel provided, ignoring`);
+  const webhookUrl = getWebhookUrl(env, event);
+  if (webhookUrl === undefined) {
+    console.log(`  No webhook URL matched, ignoring`);
     return;
   }
-  console.log(`  Matching channel id: ${channelId}`);
-  const channel = client.channels.cache.get(channelId) as TextChannel | undefined;
-  if (!channel) {
-    console.error('  Could not find channel with ID ', channelId);
-    return;
-  }
+  console.log(`  Matched webhook URL: ${webhookUrl.substring(0, 60)}...`);
 
-  console.log(`  delivering to: ${channel.name}`);
-
-  const message = `🤖 **Attention: here's the next meetup! Come join us for fun and games.**
+  const message = `**Attention: here's the next meetup! Come join us for fun and games.**
 
   ${event.title}
   ${event.eventUrl}
   `;
+
   try {
-    if (config.FAKE_SEND) {
+    if (env.FAKE_SEND) {
       console.log('  ** FAKE_SEND is enabled. NOT SENDING TO DISCORD **');
     } else {
-      await channel.send(message);
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: message }),
+      });
+      if (!response.ok) {
+        console.error(`  Webhook POST failed: ${response.status} ${response.statusText}`);
+        return;
+      }
     }
     console.log(`  Message sent.`);
   } catch (err) {

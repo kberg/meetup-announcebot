@@ -1,21 +1,20 @@
-import { Client } from "discord.js";
-import { config } from "./config";
-import {loop} from "./loop";
+import { Env } from "./types";
+import { runOnce } from "./loop";
 
-const client = new Client({
-  intents: ["Guilds", "GuildMessages"],
-});
+export default {
+  async scheduled(_event: ScheduledEvent, env: Env, _ctx: ExecutionContext): Promise<void> {
+    console.log("Cron trigger fired");
+    await runOnce(env);
+  },
 
-client.once("ready", async () => {
-  console.log("Discord bot is ready! 🤖");
-  try {
-    await loop(client);
-  } catch (err) {
-    console.log(err);
-  }
-  setTimeout(async () => {
-    await loop(client);
-  }, config.SLEEP_TIME_SECONDS * 1000);
-});
-
-client.login(config.DISCORD_TOKEN);
+  async fetch(_request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
+    console.log("Manual trigger via HTTP");
+    try {
+      await runOnce(env);
+      return new Response("OK", { status: 200 });
+    } catch (err) {
+      console.error(err);
+      return new Response("Error: " + String(err), { status: 500 });
+    }
+  },
+};

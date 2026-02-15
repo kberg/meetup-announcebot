@@ -1,7 +1,7 @@
 import { z } from "zod";
-import {existsSync, readFileSync, writeFileSync} from 'fs';
+import { Env } from "./types";
 
-const historyFile = 'history.json';
+const HISTORY_KEY = "posted";
 
 export const History = z.object({
   posted: z.array(z.string()).default([]),
@@ -9,17 +9,17 @@ export const History = z.object({
 
 export type History = z.infer<typeof History>;
 
-export function readHistory(): History {
-  if (!existsSync(historyFile)) {
-    writeHistory(History.parse({}));
+export async function readHistory(env: Env): Promise<History> {
+  const raw = await env.HISTORY_KV.get(HISTORY_KEY);
+  if (raw === null) {
+    return History.parse({});
   }
-  const history = History.parse(JSON.parse(readFileSync(historyFile).toString()));
-
-  // Keeping this file small, keeping only the most recent 100 entries (that are pushed on to the back)
+  const history = History.parse(JSON.parse(raw));
+  // Keep only the most recent 100 entries (pushed on to the back)
   history.posted = history.posted.slice(-100);
   return history;
 }
 
-export function writeHistory(history: History): void {
-  writeFileSync(historyFile, JSON.stringify(history));
+export async function writeHistory(env: Env, history: History): Promise<void> {
+  await env.HISTORY_KV.put(HISTORY_KEY, JSON.stringify(history));
 }

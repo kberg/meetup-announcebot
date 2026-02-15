@@ -1,0 +1,21 @@
+# Sample .dev.vars file for local development with wrangler dev
+#
+# Copy this file to .dev.vars and fill in the values.
+# These are secrets that should not be checked into source control.
+
+# DEFAULT_WEBHOOK_URL: A Discord webhook URL for the default channel.
+# Events that don't match any pattern in WEBHOOK_URLS will be sent here.
+# If absent, unmatched events are silently ignored.
+DEFAULT_WEBHOOK_URL=https://discord.com/api/webhooks/123456789/LONG_SECRET
+
+# WEBHOOK_URLS: A JSON object mapping regex patterns to Discord webhook URLs.
+# Keys are regular expressions matched (case-insensitive) against event titles.
+# Values are Discord webhook URLs for the matching channel.
+#
+# Example:
+# WEBHOOK_URLS={"^sunday": "https://discord.com/api/webhooks/111/aaa", "^saturday": "https://discord.com/api/webhooks/222/bbb"}
+WEBHOOK_URLS={}
+
+# FAKE_SEND: When set to any value, nothing is actually sent to Discord.
+# Perfect for testing without spamming channels.
+# FAKE_SEND=y
