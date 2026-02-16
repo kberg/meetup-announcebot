@@ -14,7 +14,7 @@ export async function runOnce(env: Env): Promise<void> {
   const nowMillis = new Date().getTime();
   const leadTimeMillis = getLeadTimeDays(env.LEAD_TIME_DAYS) * DAY_TO_SECONDS * 1000;
 
-  // Events later than maxEventTimeMillis are not soon enough to publish.
+  // Events further out than LEAD_TIME_DAYS are not soon enough to announce.
   const maxEventTimeMillis = nowMillis + leadTimeMillis;
 
   const filtered = events.filter((event) => {

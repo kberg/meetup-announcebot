@@ -22,6 +22,8 @@ export async function announceMeetup(env: Env, event: Event): Promise<void> {
   const suffix = matchedUrl ? '' : ' (default)';
   console.log(`  Using webhook ${webhookUrl.substring(0, 60)}...${suffix}`);
 
+  // Unix timestamp in seconds for Discord's dynamic timestamp formatting.
+  // <t:TIMESTAMP:F> renders as full date/time, <t:TIMESTAMP:R> as relative ("in 3 days").
   const timestamp = Math.floor(event.dateTime.getTime() / 1000);
 
   const body = {

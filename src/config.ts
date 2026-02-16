@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+// WEBHOOK_URLS is a JSON object where keys are regex patterns matched against
+// event titles, and values are Discord webhook URLs for the matching channel.
+// Example: { "Board Game": "https://discord.com/api/webhooks/..." }
 const webhookUrlSchema = z.record(z.string().url());
 
 export function parseWebhookUrls(json: string): Record<string, string> {

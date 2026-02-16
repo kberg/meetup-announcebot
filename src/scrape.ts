@@ -1,7 +1,7 @@
 import { Event } from './Event';
 
 export async function scrapeMeetup(meetup: string): Promise<Array<Event>> {
-  if (meetup.indexOf('/') != -1) {
+  if (meetup.indexOf('/') !== -1) {
     throw new Error('Invalid meetup string contains a slash');
   }
 
@@ -21,6 +21,8 @@ export async function scrapeMeetup(meetup: string): Promise<Array<Event>> {
   return parseResponse(html);
 }
 
+// Meetup.com uses Next.js, which embeds page data as JSON in a <script id="__NEXT_DATA__"> tag.
+// The Apollo GraphQL cache within that JSON contains Event objects keyed as "Event:<id>".
 function parseResponse(html: string): Array<Event> {
   const events: Array<Event> = [];
   const match = html.match(/<script\s+id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
