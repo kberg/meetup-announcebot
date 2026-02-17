@@ -29,7 +29,7 @@ export async function announceMeetup(env: Env, webhookUrls: Record<string, strin
     embeds: [{
       title: event.title,
       url: event.eventUrl,
-      description: `Come join us for fun and games!\n\n:calendar_spiral: <t:${timestamp}:F>\n:clock3: <t:${timestamp}:R>`,
+      description: `Here's the next meetup!\n\n:calendar_spiral: <t:${timestamp}:F>\n:clock3: <t:${timestamp}:R>`,
       color: 0xED1C40,
     }],
   };
