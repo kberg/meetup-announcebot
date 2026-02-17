@@ -1,11 +1,7 @@
 import { Event } from './Event';
 
 export async function scrapeMeetup(meetup: string): Promise<Array<Event>> {
-  if (meetup.indexOf('/') !== -1) {
-    throw new Error('Invalid meetup string contains a slash');
-  }
-
-  const url = `https://www.meetup.com/${meetup}/events/`;
+  const url = `https://www.meetup.com/${encodeURIComponent(meetup)}/events/`;
   console.log(`Fetching: ${url}`);
   const response = await fetch(url, {
     headers: {
