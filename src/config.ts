@@ -8,9 +8,8 @@ const isDigits = (value: string) => /^\d+$/.test(value);
 const channelIdSchema = z.record(z.string().refine(isDigits));
 
 function parseAndValidateJson(jsonString: string | undefined): z.infer<typeof channelIdSchema> {
-  if (jsonString === undefined) {
-    throw new Error('CHANNEL_IDS not defined');
-  }
+  jsonString = jsonString ?? '{}';
+
   try {
     const data = JSON.parse(jsonString);
     const sp = channelIdSchema.safeParse(data);

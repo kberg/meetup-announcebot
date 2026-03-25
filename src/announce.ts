@@ -1,4 +1,4 @@
-import {Client, TextChannel} from "discord.js";
+import {Client, EmbedBuilder, TextChannel} from "discord.js";
 import {Event, eventToString} from "./Event";
 import {config} from "./config";
 
@@ -27,19 +27,44 @@ export async function announceMeetup(client: Client<boolean>, event: Event): Pro
 
   console.log(`  delivering to: ${channel.name}`);
 
-  const message = `🤖 **Attention: here's the next meetup! Come join us for fun and games.**
-
-  ${event.title}
-  ${event.eventUrl}
-  `;
   try {
     if (config.FAKE_SEND) {
       console.log('  ** FAKE_SEND is enabled. NOT SENDING TO DISCORD **');
     } else {
-      await channel.send(message);
+      if (false) {
+        const message = simple(event);
+        await channel.send(message);
+      } else {
+        const embed = sophisticated(event);
+        await channel.send({ embeds: [embed] });
+      }
     }
     console.log(`  Message sent.`);
   } catch (err) {
     console.error('  Error sending message:', err);
   }
+}
+
+function simple(event: {id: string; title: string; eventUrl: string; dateTime: Date;}) {
+  return `🤖 **Attention: here's the next meetup! Come join us for fun and games.**
+
+  ${event.title}
+  ${event.eventUrl}
+  `;
+}
+
+function sophisticated(event: Event) {
+
+  function pad(n: number): string {
+    return ('0' + n).slice(-2);
+  }
+  const date = event.dateTime;
+  const dateString = '' + date.getFullYear() + '-' + pad(date.getMonth()+1) + '-' + pad(date.getDate());
+  const timeString = '' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+  return new EmbedBuilder()
+    .setURL(event.eventUrl)
+    .setTitle(event.title)
+    .addFields({name: 'Date', value: dateString, inline: true})
+    .addFields({name: 'Time', value: timeString, inline: true});
+    // .addFields({name: 'Location', value: event, inline: true})
 }
