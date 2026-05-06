@@ -7,18 +7,20 @@ function getWebhookUrl(env: Env, event: Event): string | undefined {
   const entry = Object.entries(webhookUrls).find(([regexp, _url]) => {
     return new RegExp(regexp, 'gi').test(event.title);
   });
-  return entry?.[1] || env.DEFAULT_WEBHOOK_URL || undefined;
+  return entry?.[1];
 }
 
 export async function announceMeetup(env: Env, event: Event): Promise<void> {
   console.log(`Announcing ${eventToString(event)}`);
 
-  const webhookUrl = getWebhookUrl(env, event);
+  const matchedUrl = getWebhookUrl(env, event);
+  const webhookUrl = matchedUrl || env.DEFAULT_WEBHOOK_URL || undefined;
   if (webhookUrl === undefined) {
     console.log(`  No webhook URL matched, ignoring`);
     return;
   }
-  console.log(`  Matched webhook URL: ${webhookUrl.substring(0, 60)}...`);
+  const suffix = matchedUrl ? '' : ' (default)';
+  console.log(`  Using webhook ${webhookUrl.substring(0, 60)}...${suffix}`);
 
   const timestamp = Math.floor(event.dateTime.getTime() / 1000);
 
@@ -34,7 +36,7 @@ export async function announceMeetup(env: Env, event: Event): Promise<void> {
 
   try {
     if (env.FAKE_SEND) {
-      console.log('  ** FAKE_SEND is enabled. NOT SENDING TO DISCORD **');
+      console.log('  ** Not sending to discord **');
     } else {
       const response = await fetch(webhookUrl, {
         method: "POST",
@@ -45,9 +47,11 @@ export async function announceMeetup(env: Env, event: Event): Promise<void> {
         console.error(`  Webhook POST failed: ${response.status} ${response.statusText}`);
         return;
       }
+      console.log(`  Message sent.`);
     }
-    console.log(`  Message sent.`);
   } catch (err) {
     console.error('  Error sending message:', err);
   }
+
+  console.log();
 }
