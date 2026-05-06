@@ -31,6 +31,7 @@ const envSchema = z.object({
   SLEEP_TIME_SECONDS: z.coerce.number().default(7200), // 2 hours
   LEAD_TIME_DAYS: z.coerce.number().default(6.5),
   FAKE_SEND: z.string().optional(),
+  SCRAPER: z.enum(['html', 'graphql']).default('html'),
 });
 
 const innerConfig = envSchema.parse(process.env);
