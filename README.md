@@ -15,6 +15,11 @@ The six-day limit is currently hard-coded but could be changed.
 This bot will create a file called `history.json` which will keep track of how far into the future
 it has looked for events. If you touch that, the bot might push new events.
 
+## Testing
+
+If you want to test this without writing to Discord, set the `FAKE_SEND` environment variable.
+Even easier, you can use the command `npm run dev:fake` which does that for you.
+
 ## Notes for myself
 
 * https://dev.to/fellipeutaka/creating-your-first-discord-bot-using-typescript-1eh6
