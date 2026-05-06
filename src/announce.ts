@@ -31,13 +31,10 @@ export async function announceMeetup(client: Client<boolean>, event: Event): Pro
     if (config.FAKE_SEND) {
       console.log('  ** FAKE_SEND is enabled. NOT SENDING TO DISCORD **');
     } else {
-      if (false) {
-        const message = simple(event);
-        await channel.send(message);
-      } else {
-        const embed = sophisticated(event);
-        await channel.send({ embeds: [embed] });
-      }
+      // const message = simple(event);
+      // await channel.send(message);
+      const embed = sophisticated(event);
+      await channel.send({ embeds: [embed] });
     }
     console.log(`  Message sent.`);
   } catch (err) {
