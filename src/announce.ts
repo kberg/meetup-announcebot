@@ -6,40 +6,44 @@ function getChannelId(client: Client<boolean>, event: Event): string | undefined
   const e = Object.entries(config.CHANNEL_IDS).find(([regexp, _channelId]) => {
     return new RegExp(regexp, 'gi').test(event.title)
   });
-  return e?.[1] || config.DEFAULT_CHANNEL_ID;
+  return e?.[1];
 }
 
 export async function announceMeetup(client: Client<boolean>, event: Event): Promise<void> {
   const title = event.title;
   console.log(`Announcing ${eventToString(event)}`);
 
-  const channelId = getChannelId(client, event);
+  let fetchedChannelId = getChannelId(client, event);
+  const channelId = fetchedChannelId || config.DEFAULT_CHANNEL_ID;
   if (channelId === undefined) {
     console.log(`  No channel provided, ignoring`);
     return;
   }
-  console.log(`  Matching channel id: ${channelId}`);
   const channel = client.channels.cache.get(channelId) as TextChannel | undefined;
+  process.stdout.write(`  Channel is ${channel?.name} ${channelId}`);
+  if (fetchedChannelId === undefined) {
+    process.stdout.write(' (default)');
+  }
+  process.stdout.write('\n');
   if (!channel) {
-    console.error('  Could not find channel with ID ', channelId);
     return;
   }
 
-  console.log(`  delivering to: ${channel.name}`);
-
   try {
     if (config.FAKE_SEND) {
-      console.log('  ** FAKE_SEND is enabled. NOT SENDING TO DISCORD **');
+      console.log('  ** Not sending to discord **');
     } else {
       // const message = simple(event);
       // await channel.send(message);
       const embed = sophisticated(event);
       await channel.send({ embeds: [embed] });
+      console.log(`  Message sent.`);
     }
-    console.log(`  Message sent.`);
   } catch (err) {
     console.error('  Error sending message:', err);
   }
+
+  console.log();
 }
 
 function simple(event: {id: string; title: string; eventUrl: string; dateTime: Date;}) {
